@@ -2,7 +2,7 @@ package com.firexweb.android.popularmovies.items;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import java.util.Calendar;
 
 
 /**
@@ -57,6 +57,15 @@ public class Date implements Parcelable
         }
     }
 
+    public Date(long dateFormat)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(dateFormat);
+        this.year = cal.get(Calendar.YEAR);
+        this.month = cal.get(Calendar.MONTH);
+        this.day = cal.get(Calendar.DAY_OF_MONTH);
+    }
+
     @Override
     public void writeToParcel(Parcel dest,int flags)
     {
@@ -95,5 +104,14 @@ public class Date implements Parcelable
         String dd = day < 10 ? "0" + this.day : String.valueOf(this.day);
 
         return yyyy + "-" + mm + "-" + dd;
+    }
+
+    public long getDateInLongFormat()
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, this.year);
+        cal.set(Calendar.MONTH, this.month);
+        cal.set(Calendar.DAY_OF_MONTH, this.day);
+        return cal.getTimeInMillis();
     }
 }

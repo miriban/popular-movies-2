@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.firexweb.android.popularmovies.R;
 import com.firexweb.android.popularmovies.items.Movie;
-import com.firexweb.android.popularmovies.network.NetworkUtility;
+import com.firexweb.android.popularmovies.utilities.NetworkUtility;
 import com.squareup.picasso.Picasso;
 
 public class DetailActivity extends AppCompatActivity

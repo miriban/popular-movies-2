@@ -1,6 +1,7 @@
 package com.firexweb.android.popularmovies.gui.adapters.viewholders;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -8,7 +9,7 @@ import android.widget.ImageView;
 import com.firexweb.android.popularmovies.gui.activities.DetailActivity;
 import com.firexweb.android.popularmovies.R;
 import com.firexweb.android.popularmovies.items.Movie;
-import com.firexweb.android.popularmovies.network.NetworkUtility;
+import com.firexweb.android.popularmovies.utilities.NetworkUtility;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -32,9 +33,9 @@ public class MovieHolder extends ViewHolder<Movie> implements View.OnClickListen
     }
 
     @Override
-    public void bind(Movie movie)
+    public void bind(Cursor cursor)
     {
-        this.movie = movie;
+        this.movie = new Movie(cursor);
         URL url = NetworkUtility.buildUrlForImage(movie.getThumbUrl());
         Log.d(TAG,"URL of Image is => "+url);
         Picasso.with(thumb.getContext()).load(url.toString()).placeholder(R.drawable.placeholder)

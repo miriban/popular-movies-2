@@ -1,5 +1,10 @@
 package com.firexweb.android.popularmovies.gui.activities;
 
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,17 +18,28 @@ import android.widget.TextView;
 
 import com.firexweb.android.popularmovies.MovieController;
 import com.firexweb.android.popularmovies.R;
+import com.firexweb.android.popularmovies.data.MovieContract;
 import com.firexweb.android.popularmovies.gui.adapters.Adapter;
 import com.firexweb.android.popularmovies.gui.adapters.viewholders.MovieHolder;
-import com.firexweb.android.popularmovies.items.Movie;
-import com.firexweb.android.popularmovies.utilities.JSONUtility;
+import com.firexweb.android.popularmovies.loaders.DBLoader;
+import com.firexweb.android.popularmovies.receivers.NetworkReceiver;
+import com.firexweb.android.popularmovies.services.NetworkService;
+import com.firexweb.android.popularmovies.utilities.NetworkUtility;
 
-public class MainActivity extends AppCompatActivity
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,NetworkReceiver.Receiver
 {
+    public final static int MOVIE_DB_LOADER = 1;
+    public final static String BUNDLE_DB_PATH_KEY = "path";
+
+
     private final static String TAG = MainActivity.class.getSimpleName();
     private RecyclerView movie_list_recyclerView;
-    private TextView error_msg_text_view;
-    private ProgressBar loading_progress_bar;
+    private ProgressBar movies_progress_bar;
+    private TextView movies_error_text_view;
+    private Adapter<MovieHolder> movieAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -31,51 +47,102 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        movie_list_recyclerView = (RecyclerView) findViewById(R.id.rv_movies);
-        error_msg_text_view = (TextView) findViewById(R.id.tv_error_msg);
-        loading_progress_bar = (ProgressBar) findViewById(R.id.pb_loading_movies);
+        this.movies_progress_bar = (ProgressBar) findViewById(R.id.pb_loading);
+        this.movies_error_text_view = (TextView) findViewById(R.id.tv_error_msg);
+        this.movie_list_recyclerView = (RecyclerView) findViewById(R.id.rv_movies);
+        this.movieAdapter = new Adapter<>(R.layout.movie_item,null,MovieHolder.class);
+        GridLayoutManager layoutManager = new GridLayoutManager(movie_list_recyclerView.getContext(),2);
+        movie_list_recyclerView.setLayoutManager(layoutManager);
+        movie_list_recyclerView.setHasFixedSize(true);
+        movie_list_recyclerView.setAdapter(movieAdapter);
+
 
         // load popular movies
         MovieController.getInstance().getPopularMovies(this);
+
     }
 
-    public void populateMoviesToList(Movie movies[])
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, final Bundle args)
     {
-        if(this.movie_list_recyclerView != null)
+        return new AsyncTaskLoader<Cursor>(this)
         {
-            Adapter<MovieHolder> movieAdapter = new Adapter<>(R.layout.movie_item,movies,MovieHolder.class);
-            GridLayoutManager layoutManager = new GridLayoutManager(movie_list_recyclerView.getContext(),2);
-            movie_list_recyclerView.setLayoutManager(layoutManager);
-            movie_list_recyclerView.setHasFixedSize(true);
-            movie_list_recyclerView.setAdapter(movieAdapter);
+            private Cursor cachedCursor;
+
+            @Override
+            protected void onStartLoading()
+            {
+                super.onStartLoading();
+                if(args == null)
+                    return;
+
+                if(cachedCursor != null)
+                    deliverResult(cachedCursor);
+                else
+                    forceLoad();
+            }
+
+            @Override
+            public Cursor loadInBackground()
+            {
+                String path = args.getString(MainActivity.BUNDLE_DB_PATH_KEY);
+                Uri uri = MovieContract.MoviesEntry.CONTENT_URI.buildUpon().appendPath(path).build();
+                return MovieController.getInstance().getMoviesFromDB(this.getContext(),uri);
+            }
+
+            @Override
+            public void deliverResult(Cursor newCursor)
+            {
+                cachedCursor = newCursor;
+                super.deliverResult(newCursor);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Cursor cursor)
+    {
+        showData(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader)
+    {
+        // nothing to do
+    }
+
+
+    @Override
+    public void showData(Cursor cursor)
+    {
+        if(cursor.getCount()!=0)
+        {
+            movie_list_recyclerView.setVisibility(View.VISIBLE);
+            this.movieAdapter.swapCursor(cursor);
+        }
+        else
+        {
+           showErrorMessage(getString(R.string.error_loading_date));
+        }
+
+    }
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData)
+    {
+        // received from service
+        String url = resultData.getString(NetworkService.BUNDLE_URL_KEY);
+        if(url.equals(NetworkUtility.MOST_POPULAR_MOVIES_BASE_URL))
+        {
+            MovieController.getInstance().getMoviesWithLoader(this,MovieContract.PATH_MOST_POPULAR);
+        }
+        else if(url.equals(NetworkUtility.TOP_RATED_MOVIES_BASE_URL))
+        {
+            MovieController.getInstance().getMoviesWithLoader(this,MovieContract.PATH_TOP_RATED);
         }
     }
 
-    public void showProgressBar()
-    {
-        this.loading_progress_bar.setVisibility(View.VISIBLE);
-        this.error_msg_text_view.setVisibility(View.INVISIBLE);
-        this.movie_list_recyclerView.setVisibility(View.INVISIBLE);
-    }
 
-
-    public void hideProgressBar()
-    {
-        this.loading_progress_bar.setVisibility(View.INVISIBLE);
-        this.movie_list_recyclerView.setVisibility(View.VISIBLE);
-    }
-
-    public void showErrorMessage()
-    {
-        this.error_msg_text_view.setVisibility(View.VISIBLE);
-        this.movie_list_recyclerView.setVisibility(View.INVISIBLE);
-    }
-
-    public void hideErrorMessage()
-    {
-        this.error_msg_text_view.setVisibility(View.INVISIBLE);
-        this.movie_list_recyclerView.setVisibility(View.VISIBLE);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -94,5 +161,35 @@ public class MainActivity extends AppCompatActivity
             MovieController.getInstance().getTopRankedMovies(this);
 
         return true;
+    }
+
+    public void hideRecyclerView()
+    {
+        this.movie_list_recyclerView.setVisibility(View.GONE);
+        this.showProgressBar();
+    }
+
+    public void hideProgressBar()
+    {
+        this.movies_progress_bar.setVisibility(View.GONE);
+
+    }
+
+    public void showProgressBar()
+    {
+        hideErrorMessage();
+        this.movies_progress_bar.setVisibility(View.VISIBLE);
+    }
+
+    public void showErrorMessage(String msg)
+    {
+        hideProgressBar();
+        this.movies_error_text_view.setText(msg);
+        this.movies_error_text_view.setVisibility(View.VISIBLE);
+    }
+
+    public void hideErrorMessage()
+    {
+        this.movies_error_text_view.setVisibility(View.GONE);
     }
 }

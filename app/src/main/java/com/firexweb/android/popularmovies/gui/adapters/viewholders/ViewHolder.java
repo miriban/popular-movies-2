@@ -1,5 +1,6 @@
 package com.firexweb.android.popularmovies.gui.adapters.viewholders;
 
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -14,5 +15,5 @@ public abstract class ViewHolder<T> extends RecyclerView.ViewHolder
         super(view);
     }
 
-    public abstract void bind(T object);
+    public abstract void bind(Cursor cursor);
 }

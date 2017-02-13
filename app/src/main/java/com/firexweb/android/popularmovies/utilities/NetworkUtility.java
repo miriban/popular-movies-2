@@ -1,4 +1,4 @@
-package com.firexweb.android.popularmovies.network;
+package com.firexweb.android.popularmovies.utilities;
 
 import android.net.Uri;
 import android.net.wifi.ScanResult;
@@ -22,7 +22,7 @@ public final class NetworkUtility
     private static final String IMAGE_MOVIE_BASE_URL = "http://image.tmdb.org/t/p/w185/";
 
     private static final String API_KEY_QUERY = "api_key";
-    private static final String API_KEY = ""; // TODO : please put your own key here!
+    private static final String API_KEY = "544e7af9ceb068d9eeba3c155fca7fba"; // TODO : please put your own key here!
 
     public static URL buildUrl(String basePath)
     {
