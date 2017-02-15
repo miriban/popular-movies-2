@@ -27,7 +27,7 @@ public final class NetworkUtility
     public static final String PATH_TRAILERS = "trailers";
 
     private static final String API_KEY_QUERY = "api_key";
-    private static final String API_KEY = BuildConfig.MovieDBKey;
+    private static final String API_KEY =  BuildConfig.MovieDBKey;
 
 
 
