@@ -4,6 +4,8 @@ import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.os.HandlerThread;
 
+import com.firexweb.android.popularmovies.BuildConfig;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,7 +27,7 @@ public final class NetworkUtility
     public static final String PATH_TRAILERS = "trailers";
 
     private static final String API_KEY_QUERY = "api_key";
-    private static final String API_KEY = "544e7af9ceb068d9eeba3c155fca7fba"; // TODO : please put your own key here!
+    private static final String API_KEY = BuildConfig.MovieDBKey;
 
 
 
