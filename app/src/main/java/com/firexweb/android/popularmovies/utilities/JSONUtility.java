@@ -2,6 +2,7 @@ package com.firexweb.android.popularmovies.utilities;
 
 import com.firexweb.android.popularmovies.items.Date;
 import com.firexweb.android.popularmovies.items.Movie;
+import com.firexweb.android.popularmovies.items.Trailer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,5 +54,62 @@ public final class JSONUtility
         }
 
         return movies;
+    }
+
+    public static int getMovieIdFromJSONString(String jsonData)
+    {
+        final String ID = "id";
+        int id = -1;
+        try
+        {
+            JSONObject trailersJSON = new JSONObject(jsonData);
+            if(!trailersJSON.has(ID))
+                throw new JSONException("No Movie ID detected!");
+            id = trailersJSON.getInt(ID);
+        }
+        catch (JSONException ex)
+        {
+            ex.printStackTrace();
+        }
+        return id;
+    }
+
+    public static Trailer[] getTrailersFromJSONString(String jsonData)
+    {
+        final String ID = "id";
+        final String YOUTUBE = "youtube";
+
+        final String NAME = "name";
+        final String SOURCE = "source";
+
+        Trailer trailers[] = null;
+
+        try
+        {
+            JSONObject trailersJSON = new JSONObject(jsonData);
+            if(!trailersJSON.has(ID))
+                throw new JSONException("No trailers where found!");
+
+            JSONArray jsonTrailers = trailersJSON.getJSONArray(YOUTUBE);
+            int id = trailersJSON.getInt(ID);
+
+
+            trailers = new Trailer[jsonTrailers.length()];
+
+            for(int i=0;i<jsonTrailers.length();i++)
+            {
+                JSONObject trailerJSON = jsonTrailers.getJSONObject(i);
+
+                String name = trailerJSON.getString(NAME);
+                String source = trailerJSON.getString(SOURCE);
+                trailers[i] = new Trailer(id,name,source);
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        return trailers;
     }
 }

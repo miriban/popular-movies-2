@@ -17,12 +17,17 @@ import java.util.Scanner;
 
 public final class NetworkUtility
 {
+    public static final String MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/";
     public static final String MOST_POPULAR_MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/popular";
     public static final String TOP_RATED_MOVIES_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated";
     private static final String IMAGE_MOVIE_BASE_URL = "http://image.tmdb.org/t/p/w185/";
 
+    public static final String PATH_TRAILERS = "trailers";
+
     private static final String API_KEY_QUERY = "api_key";
     private static final String API_KEY = "544e7af9ceb068d9eeba3c155fca7fba"; // TODO : please put your own key here!
+
+
 
     public static URL buildUrl(String basePath)
     {
@@ -75,6 +80,22 @@ public final class NetworkUtility
         {
             urlConnection.disconnect();
         }
+    }
+
+    public static String getTrailerURL(int movieID)
+    {
+        Uri uri = Uri.parse(MOVIES_BASE_URL).buildUpon().appendPath(Integer.toString(movieID))
+                .appendPath(PATH_TRAILERS).appendQueryParameter(API_KEY_QUERY,API_KEY).build();
+        return uri.toString();
+    }
+
+    public static Uri getYoutubeURL(String source)
+    {
+        Uri uri = Uri.parse("https://www.youtube.com/watch")
+                .buildUpon()
+                .appendQueryParameter("v",source)
+                .build();
+        return uri;
     }
 
 }

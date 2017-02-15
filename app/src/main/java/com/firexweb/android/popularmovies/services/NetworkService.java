@@ -1,19 +1,12 @@
 package com.firexweb.android.popularmovies.services;
 
 import android.app.IntentService;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import android.support.v4.content.LocalBroadcastManager;
 
-import com.firexweb.android.popularmovies.data.MovieContract;
-import com.firexweb.android.popularmovies.items.Movie;
 import com.firexweb.android.popularmovies.receivers.NetworkReceiver;
 import com.firexweb.android.popularmovies.utilities.NetworkUtility;
-import com.firexweb.android.popularmovies.utilities.JSONUtility;
 
 import java.io.IOException;
 import java.net.URL;

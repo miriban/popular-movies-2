@@ -2,14 +2,12 @@ package com.firexweb.android.popularmovies.gui.activities;
 
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,15 +16,14 @@ import android.widget.TextView;
 
 import com.firexweb.android.popularmovies.MovieController;
 import com.firexweb.android.popularmovies.R;
-import com.firexweb.android.popularmovies.data.MovieContract;
+import com.firexweb.android.popularmovies.data.content.MovieContract;
+import com.firexweb.android.popularmovies.data.tables.MovieTable;
 import com.firexweb.android.popularmovies.gui.adapters.Adapter;
 import com.firexweb.android.popularmovies.gui.adapters.viewholders.MovieHolder;
 import com.firexweb.android.popularmovies.loaders.DBLoader;
 import com.firexweb.android.popularmovies.receivers.NetworkReceiver;
 import com.firexweb.android.popularmovies.services.NetworkService;
 import com.firexweb.android.popularmovies.utilities.NetworkUtility;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,NetworkReceiver.Receiver
 {
@@ -86,7 +83,8 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
             public Cursor loadInBackground()
             {
                 String path = args.getString(MainActivity.BUNDLE_DB_PATH_KEY);
-                Uri uri = MovieContract.MoviesEntry.CONTENT_URI.buildUpon().appendPath(path).build();
+                Uri uri = MovieContract.BASE_CONTENT_URI.buildUpon().appendPath(MovieTable.PATH_MOVIES)
+                .appendPath(path).build();
                 return MovieController.getInstance().getMoviesFromDB(this.getContext(),uri);
             }
 
@@ -134,11 +132,11 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
         String url = resultData.getString(NetworkService.BUNDLE_URL_KEY);
         if(url.equals(NetworkUtility.MOST_POPULAR_MOVIES_BASE_URL))
         {
-            MovieController.getInstance().getMoviesWithLoader(this,MovieContract.PATH_MOST_POPULAR);
+            MovieController.getInstance().getMoviesWithLoader(this,MovieTable.PATH_MOST_POPULAR);
         }
         else if(url.equals(NetworkUtility.TOP_RATED_MOVIES_BASE_URL))
         {
-            MovieController.getInstance().getMoviesWithLoader(this,MovieContract.PATH_TOP_RATED);
+            MovieController.getInstance().getMoviesWithLoader(this,MovieTable.PATH_TOP_RATED);
         }
     }
 

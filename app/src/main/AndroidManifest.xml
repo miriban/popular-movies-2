@@ -32,6 +32,10 @@
             android:name=".services.MovieNetworkService"
             android:exported="false"
             />
+        <service
+            android:name=".services.TrailerNetworkService"
+            android:exported="false"
+            />
     </application>
 
 </manifest>

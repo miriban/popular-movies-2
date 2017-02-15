@@ -3,4 +3,10 @@
     <string name="popular_movies">Popular Movies</string>
     <string name="top_ranking_movies">Top Ranking Movies</string>
     <string name="error_loading_date">There was an Error! Please Try again!</string>
+
+    <!-- Trailers -->
+    <string name="trailers_section_title">Trailers:</string>
+
+    <!-- Image Holder -->
+    <string name="image_trailer_content_description">Trailer Play</string>
 </resources>

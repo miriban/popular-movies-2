@@ -11,10 +11,17 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.widget.Toast;
 
-import com.firexweb.android.popularmovies.data.MovieContract;
+import com.firexweb.android.popularmovies.data.content.MovieContract;
+import com.firexweb.android.popularmovies.data.tables.MovieTable;
+import com.firexweb.android.popularmovies.data.tables.TrailerTable;
+import com.firexweb.android.popularmovies.gui.activities.DetailActivity;
 import com.firexweb.android.popularmovies.gui.activities.MainActivity;
+import com.firexweb.android.popularmovies.items.Trailer;
+import com.firexweb.android.popularmovies.loaders.LoaderBuilder;
 import com.firexweb.android.popularmovies.receivers.NetworkReceiver;
 import com.firexweb.android.popularmovies.services.MovieNetworkService;
+import com.firexweb.android.popularmovies.services.ServiceBuilder;
+import com.firexweb.android.popularmovies.services.TrailerNetworkService;
 import com.firexweb.android.popularmovies.utilities.NetworkUtility;
 import com.firexweb.android.popularmovies.utilities.ProjectionUtility;
 
@@ -48,54 +55,74 @@ public class MovieController
     public void getPopularMovies(MainActivity mainActivity)
     {
         mainActivity.hideRecyclerView();
-        startMovieNetworkService(mainActivity, NetworkUtility.MOST_POPULAR_MOVIES_BASE_URL);
+        ServiceBuilder builder = new ServiceBuilder(mainActivity);
+        builder.setIntent(MovieNetworkService.class)
+                .setIntentExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,new NetworkReceiver(new Handler()))
+                .setIntentAction(NetworkUtility.MOST_POPULAR_MOVIES_BASE_URL)
+                .setReceiverActivity(mainActivity)
+                .startService();
     }
 
     public void getTopRankedMovies(MainActivity mainActivity)
     {
         mainActivity.hideRecyclerView();
-        startMovieNetworkService(mainActivity, NetworkUtility.TOP_RATED_MOVIES_BASE_URL);
+
+        ServiceBuilder builder = new ServiceBuilder(mainActivity);
+        builder.setIntent(MovieNetworkService.class)
+                .setIntentExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,new NetworkReceiver(new Handler()))
+                .setIntentAction(NetworkUtility.TOP_RATED_MOVIES_BASE_URL)
+                .setReceiverActivity(mainActivity)
+                .startService();
+    }
+
+    public void getTrailers(DetailActivity detailActivity,int movieID)
+    {
+        ServiceBuilder builder = new ServiceBuilder(detailActivity);
+        builder.setIntent(TrailerNetworkService.class)
+                .setIntentExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,new NetworkReceiver(new Handler()))
+                .setIntentAction(NetworkUtility.getTrailerURL(movieID))
+                .setReceiverActivity(detailActivity)
+                .startService();
     }
 
     public void getMoviesWithLoader(MainActivity mainActivity, String path)
     {
         Bundle bundle = new Bundle();
         bundle.putString(MainActivity.BUNDLE_DB_PATH_KEY,path);
-        startLoader(mainActivity.getSupportLoaderManager(),bundle, mainActivity);
+
+        LoaderBuilder builder = new LoaderBuilder(mainActivity.getSupportLoaderManager());
+        builder.buildUpon()
+                .setLoaderId(MainActivity.MOVIE_DB_LOADER)
+                .setBundle(bundle)
+                .setLoaderCallBacks(mainActivity)
+                .run();
     }
 
-    private void startMovieNetworkService(MainActivity mainActivity, String url)
+    public void getTrailersWithLoader(DetailActivity detailActivity,int movieID)
     {
-        NetworkReceiver receiver = new NetworkReceiver(new Handler());
-        receiver.setReceiver(mainActivity);
-        Intent intent = new Intent(mainActivity, MovieNetworkService.class);
-        intent.putExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,receiver);
-        intent.setAction(url);
-        mainActivity.startService(intent);
-    }
-
-    private void startLoader(LoaderManager loaderManager,Bundle bundle,LoaderManager.LoaderCallbacks<Cursor> loaderCallbacks)
-    {
-        Loader<Cursor> loader = loaderManager.getLoader(MainActivity.MOVIE_DB_LOADER);
-        if(loader == null)
-            loaderManager.initLoader(MainActivity.MOVIE_DB_LOADER,bundle,loaderCallbacks);
-        else
-            loaderManager.restartLoader(MainActivity.MOVIE_DB_LOADER,bundle,loaderCallbacks);
-    }
-
-    public void showToast(Context context,String text)
-    {
-        if(this.mToast != null)
-            this.mToast.cancel();
-
-        this.mToast = Toast.makeText(context,text,Toast.LENGTH_LONG);
-        this.mToast.show();
+        Bundle bundle = new Bundle();
+        Uri uri = MovieContract.BASE_CONTENT_URI.buildUpon().appendPath(TrailerTable.PATH_TRAILERS)
+                .appendPath(Integer.toString(movieID)).build();
+        bundle.putString(DetailActivity.BUNDLE_DB_URI_KEY,uri.toString());
+        LoaderBuilder builder = new LoaderBuilder(detailActivity.getSupportLoaderManager());
+        builder.buildUpon()
+                .setLoaderId(DetailActivity.LOADER_TRAILER)
+                .setBundle(bundle)
+                .setLoaderCallBacks(detailActivity)
+                .run();
     }
 
     public Cursor getMoviesFromDB(Context context,Uri uri)
     {
         ContentResolver contentResolver = context.getContentResolver();
         return contentResolver.query(uri, ProjectionUtility.MOVIE_PROJECTION,null,null,
-                MovieContract.MoviesEntry.COLUMN_MOVIE_ID);
+                MovieTable.Entry.COLUMN_MOVIE_ID);
+    }
+
+    public Cursor getTrailersFromDB(Context context,Uri uri)
+    {
+        ContentResolver contentResolver = context.getContentResolver();
+        return contentResolver.query(uri,ProjectionUtility.TRAILER_PROJECTION,null,null,
+                TrailerTable.Entry._ID);
     }
 }

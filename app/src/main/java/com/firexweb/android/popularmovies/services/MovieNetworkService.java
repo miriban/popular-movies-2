@@ -4,7 +4,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 
-import com.firexweb.android.popularmovies.data.MovieContract;
+import com.firexweb.android.popularmovies.data.content.MovieContract;
+import com.firexweb.android.popularmovies.data.tables.MovieTable;
 import com.firexweb.android.popularmovies.items.Movie;
 import com.firexweb.android.popularmovies.utilities.JSONUtility;
 import com.firexweb.android.popularmovies.utilities.NetworkUtility;
@@ -34,25 +35,25 @@ public class MovieNetworkService extends NetworkService
         for (Movie movie : movies)
         {
             ContentValues values = new ContentValues();
-            values.put(MovieContract.MoviesEntry.COLUMN_MOVIE_ID, movie.getId());
-            values.put(MovieContract.MoviesEntry.COLUMN_TITLE, movie.getTitle());
-            values.put(MovieContract.MoviesEntry.COLUMN_OVERVIEW, movie.getOverview());
-            values.put(MovieContract.MoviesEntry.COLUMN_POSTER_URL, movie.getThumbUrl());
-            values.put(MovieContract.MoviesEntry.COLUMN_RATING, movie.getRating());
-            values.put(MovieContract.MoviesEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate().getDateInLongFormat());
+            values.put(MovieTable.Entry.COLUMN_MOVIE_ID, movie.getId());
+            values.put(MovieTable.Entry.COLUMN_TITLE, movie.getTitle());
+            values.put(MovieTable.Entry.COLUMN_OVERVIEW, movie.getOverview());
+            values.put(MovieTable.Entry.COLUMN_POSTER_URL, movie.getThumbUrl());
+            values.put(MovieTable.Entry.COLUMN_RATING, movie.getRating());
+            values.put(MovieTable.Entry.COLUMN_RELEASE_DATE, movie.getReleaseDate().getDateInLongFormat());
 
             Uri targetUri = null;
 
             if (base_url.equals(NetworkUtility.MOST_POPULAR_MOVIES_BASE_URL)) {
-                values.put(MovieContract.MoviesEntry.COLUMN_IS_POPULAR, 1);
-                targetUri = MovieContract.MoviesEntry.CONTENT_URI.buildUpon().appendPath(
-                        MovieContract.PATH_MOST_POPULAR).build();
+                values.put(MovieTable.Entry.COLUMN_IS_POPULAR, 1);
+                targetUri = MovieContract.BASE_CONTENT_URI.buildUpon().appendPath(MovieTable.PATH_MOVIES)
+                        .appendPath(MovieTable.PATH_MOST_POPULAR).build();
             }
 
             if (base_url.equals(NetworkUtility.TOP_RATED_MOVIES_BASE_URL)) {
-                values.put(MovieContract.MoviesEntry.COLUMN_IS_TOP_RATED, 1);
-                targetUri = MovieContract.MoviesEntry.CONTENT_URI.buildUpon().appendPath(
-                        MovieContract.PATH_TOP_RATED).build();
+                values.put(MovieTable.Entry.COLUMN_IS_TOP_RATED, 1);
+                targetUri = MovieContract.BASE_CONTENT_URI.buildUpon().appendPath(MovieTable.PATH_MOVIES)
+                        .appendPath(MovieTable.PATH_TOP_RATED).build();
             }
 
             contentResolver.insert(targetUri, values);

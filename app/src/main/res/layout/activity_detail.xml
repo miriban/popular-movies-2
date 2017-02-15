@@ -87,6 +87,21 @@
                     android:lineSpacingExtra="10dp"
                     />
             </LinearLayout>
+            <!-- Trailer -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="25dp"
+                android:text="@string/trailers_section_title"
+                />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_trailers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                />
+            <!-- End Of Trailers -->
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

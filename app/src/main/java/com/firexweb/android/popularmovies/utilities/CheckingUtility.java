@@ -2,8 +2,6 @@ package com.firexweb.android.popularmovies.utilities;
 
 import android.content.ContentValues;
 
-import com.firexweb.android.popularmovies.data.MovieContract;
-
 /**
  * Created by wello on 2/8/17.
  */
