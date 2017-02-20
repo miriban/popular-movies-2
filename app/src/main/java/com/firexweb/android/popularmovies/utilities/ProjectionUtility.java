@@ -1,7 +1,7 @@
 package com.firexweb.android.popularmovies.utilities;
 
-import com.firexweb.android.popularmovies.data.content.MovieContract;
 import com.firexweb.android.popularmovies.data.tables.MovieTable;
+import com.firexweb.android.popularmovies.data.tables.ReviewTable;
 import com.firexweb.android.popularmovies.data.tables.TrailerTable;
 
 /**
@@ -40,6 +40,17 @@ public class ProjectionUtility
 
     public static final int INDEX_TRAILER_MOVIE_ID = 0;
     public static final int INDEX_TRAILER_JSON_DATA = 1;
+
+    /*
+        Should be the same order as index below
+     */
+    public static final String[] REVIEW_PROJECTION = {
+            ReviewTable.Entry.COLUMN_MOVIE_ID,
+            ReviewTable.Entry.COLUMN_REVIEW_JSON_DATA
+    };
+
+    public static final int INDEX_REVIEW_MOVIE_ID = 0;
+    public static final int INDEX_REVIEW_JSON_DATA = 1;
 
 
 }

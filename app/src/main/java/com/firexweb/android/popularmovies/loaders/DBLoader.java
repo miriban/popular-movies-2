@@ -9,5 +9,5 @@ import android.support.v4.app.LoaderManager;
 
 public interface DBLoader<Cursor> extends LoaderManager.LoaderCallbacks<Cursor>
 {
-    public void showData(Cursor data);
+
 }

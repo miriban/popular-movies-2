@@ -2,6 +2,7 @@ package com.firexweb.android.popularmovies.items;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import java.util.Calendar;
 
 

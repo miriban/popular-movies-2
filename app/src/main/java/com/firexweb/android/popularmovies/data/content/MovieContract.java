@@ -1,7 +1,6 @@
 package com.firexweb.android.popularmovies.data.content;
 
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 /**
  * Created by Mohammed on 2/7/17.

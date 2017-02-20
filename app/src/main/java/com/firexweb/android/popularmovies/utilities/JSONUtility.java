@@ -2,6 +2,7 @@ package com.firexweb.android.popularmovies.utilities;
 
 import com.firexweb.android.popularmovies.items.Date;
 import com.firexweb.android.popularmovies.items.Movie;
+import com.firexweb.android.popularmovies.items.Review;
 import com.firexweb.android.popularmovies.items.Trailer;
 
 import org.json.JSONArray;
@@ -111,5 +112,46 @@ public final class JSONUtility
         }
 
         return trailers;
+    }
+
+    public static Review[] getReviewsFromJSONString(String jsonData)
+    {
+        final String ID = "id";
+        final String RESULT = "results";
+
+        final String AUTHOR = "author";
+        final String CONTENT = "content";
+        final String URL = "url";
+
+        Review reviews[] = null;
+
+        try
+        {
+            JSONObject reviewJSON = new JSONObject(jsonData);
+            if(!reviewJSON.has(ID))
+                throw new JSONException("No reviews where found!");
+
+            JSONArray jsonReviews = reviewJSON.getJSONArray(RESULT);
+            int id = reviewJSON.getInt(ID);
+
+
+            reviews = new Review[jsonReviews.length()];
+
+            for(int i=0;i<jsonReviews.length();i++)
+            {
+                JSONObject reviewObj = jsonReviews.getJSONObject(i);
+
+                String author = reviewObj.getString(AUTHOR);
+                String content = reviewObj.getString(CONTENT);
+                String url = reviewObj.getString(URL);
+                reviews[i] = new Review(id,author,content,url);
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        return reviews;
     }
 }

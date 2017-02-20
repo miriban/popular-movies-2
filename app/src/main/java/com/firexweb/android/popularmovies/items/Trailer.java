@@ -2,8 +2,6 @@ package com.firexweb.android.popularmovies.items;
 
 import android.database.Cursor;
 
-import com.firexweb.android.popularmovies.utilities.ProjectionUtility;
-
 /**
  * Created by wello on 2/13/17.
  */

@@ -1,12 +1,24 @@
 <resources>
     <string name="app_name">Popular Movies</string>
     <string name="popular_movies">Popular Movies</string>
-    <string name="top_ranking_movies">Top Ranking Movies</string>
-    <string name="error_loading_date">There was an Error! Please Try again!</string>
-
+    <string name="top_ranking_movies">Top Rated Movies</string>
+    <string name="favourite_movies">Favourite Movies</string>
     <!-- Trailers -->
     <string name="trailers_section_title">Trailers:</string>
 
+    <!-- Reviews -->
+    <string name="reviews_section_title">Reviews:</string>
+
     <!-- Image Holder -->
     <string name="image_trailer_content_description">Trailer Play</string>
+
+    <!-- Messages -->
+    <string name="error_loading_data">No movies to show!</string>
+    <string name="add_to_favourite">Add to Favourite</string>
+    <string name="remove_from_favourite">Remove From Favourite</string>
+
+
+    <!-- Transitions Value -->
+    <string name="image_view_transition_name" translatable="false">image_view_shared</string>
+
 </resources>

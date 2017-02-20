@@ -2,7 +2,6 @@ package com.firexweb.android.popularmovies.services;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 
 import com.firexweb.android.popularmovies.receivers.NetworkReceiver;
 

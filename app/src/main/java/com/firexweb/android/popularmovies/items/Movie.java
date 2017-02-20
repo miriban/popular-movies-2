@@ -52,7 +52,8 @@ public class Movie implements Parcelable
         this.thumbUrl = cursor.getString(ProjectionUtility.INDEX_MOVIE_POSTER_URL);
         this.overview = cursor.getString(ProjectionUtility.INDEX_MOVIE_OVERVIEW);
         this.rating = cursor.getInt(ProjectionUtility.INDEX_MOVIE_RATING);
-        this.releaseDate = new Date(cursor.getInt(ProjectionUtility.INDEX_MOVIE_RELEASE_DATE));
+        Long dateFormat = Long.parseLong(cursor.getString(ProjectionUtility.INDEX_MOVIE_RELEASE_DATE));
+        this.releaseDate = new Date(dateFormat);
         this.isFavourite = cursor.getInt(ProjectionUtility.INDEX_MOVIE_IS_FAVOURITE);
     }
 
@@ -64,6 +65,7 @@ public class Movie implements Parcelable
         this.overview = in.readString();
         this.rating = in.readFloat();
         this.releaseDate = in.readParcelable(Date.class.getClassLoader());
+        this.isFavourite = in.readInt();
     }
 
     @Override
@@ -119,6 +121,14 @@ public class Movie implements Parcelable
         if( this.isFavourite == 1)
             return true;
         return false;
+    }
+
+    public void setIsFavourite(boolean value)
+    {
+        if(value)
+            this.isFavourite = 1;
+        else
+            this.isFavourite = 0;
     }
 
     public String toString()

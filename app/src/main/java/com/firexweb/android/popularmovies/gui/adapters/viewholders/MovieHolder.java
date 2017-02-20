@@ -1,13 +1,16 @@
 package com.firexweb.android.popularmovies.gui.adapters.viewholders;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.firexweb.android.popularmovies.gui.activities.DetailActivity;
 import com.firexweb.android.popularmovies.R;
+import com.firexweb.android.popularmovies.gui.activities.DetailActivity;
+import com.firexweb.android.popularmovies.gui.activities.MainActivity;
 import com.firexweb.android.popularmovies.items.Movie;
 import com.firexweb.android.popularmovies.utilities.NetworkUtility;
 import com.squareup.picasso.Picasso;
@@ -48,6 +51,16 @@ public class MovieHolder extends ViewHolder<Movie> implements View.OnClickListen
         // launch Detail Activity
         Intent detailActivity = new Intent(v.getContext(), DetailActivity.class);
         detailActivity.putExtra(Movie.MOVIE_OBJECT,this.movie);
-        v.getContext().startActivity(detailActivity);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            String transitionName = v.getContext().getString(R.string.image_view_transition_name);
+            ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation((MainActivity)v.getContext(), v, transitionName);
+            v.getContext().startActivity(detailActivity,transitionActivityOptions.toBundle());
+        }
+        else
+        {
+            v.getContext().startActivity(detailActivity);
+        }
+
     }
 }

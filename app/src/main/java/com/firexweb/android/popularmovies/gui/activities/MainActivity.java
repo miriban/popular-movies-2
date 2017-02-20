@@ -2,12 +2,13 @@ package com.firexweb.android.popularmovies.gui.activities;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,9 +30,11 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
 {
     public final static int MOVIE_DB_LOADER = 1;
     public final static String BUNDLE_DB_PATH_KEY = "path";
+    private final static String BUNDLE_STATE_ACTION_TITLE = "ActionBar-title";
 
 
     private final static String TAG = MainActivity.class.getSimpleName();
+    private Toolbar toolbar;
     private RecyclerView movie_list_recyclerView;
     private ProgressBar movies_progress_bar;
     private TextView movies_error_text_view;
@@ -44,6 +47,9 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        toolbar = (Toolbar) findViewById(R.id.tb_main);
+        setSupportActionBar(toolbar);
+
         this.movies_progress_bar = (ProgressBar) findViewById(R.id.pb_loading);
         this.movies_error_text_view = (TextView) findViewById(R.id.tv_error_msg);
         this.movie_list_recyclerView = (RecyclerView) findViewById(R.id.rv_movies);
@@ -53,11 +59,35 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
         movie_list_recyclerView.setHasFixedSize(true);
         movie_list_recyclerView.setAdapter(movieAdapter);
 
+        // load movies
+        if(savedInstanceState != null)
+        {
+            String title = savedInstanceState.getString(BUNDLE_STATE_ACTION_TITLE);
+            getSupportActionBar().setTitle(title);
+            getMoviesFromDB(title);
 
-        // load popular movies
-        MovieController.getInstance().getPopularMovies(this);
+        }
+        else
+        {
+            MovieController.getInstance().getPopularMovies(this);
+        }
 
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        String title = getSupportActionBar().getTitle().toString();
+        getMoviesFromDB(title);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle icicle) {
+        super.onSaveInstanceState(icicle);
+        icicle.putString(BUNDLE_STATE_ACTION_TITLE,getSupportActionBar().getTitle().toString());
+    }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, final Bundle args)
@@ -101,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
     public void onLoadFinished(Loader loader, Cursor cursor)
     {
         showData(cursor);
+        hideProgressBar();
     }
 
     @Override
@@ -110,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
     }
 
 
-    @Override
     public void showData(Cursor cursor)
     {
         if(cursor.getCount()!=0)
@@ -120,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
         }
         else
         {
-           showErrorMessage(getString(R.string.error_loading_date));
+           showErrorMessage(getString(R.string.error_loading_data));
         }
 
     }
@@ -153,10 +183,22 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if(item.getItemId() == R.id.action_popular_movies)
+        {
+            getSupportActionBar().setTitle(getString(R.string.popular_movies));
             MovieController.getInstance().getPopularMovies(this);
+        }
 
         if(item.getItemId() == R.id.action_top_ranked_movies)
+        {
+            getSupportActionBar().setTitle(getString(R.string.top_ranking_movies));
             MovieController.getInstance().getTopRankedMovies(this);
+        }
+
+        if(item.getItemId() == R.id.action_favourite_movies)
+        {
+            getSupportActionBar().setTitle(getString(R.string.favourite_movies));
+            MovieController.getInstance().getFavouriteMovies(this);
+        }
 
         return true;
     }
@@ -164,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
     public void hideRecyclerView()
     {
         this.movie_list_recyclerView.setVisibility(View.GONE);
-        this.showProgressBar();
+        showProgressBar();
     }
 
     public void hideProgressBar()
@@ -189,5 +231,21 @@ public class MainActivity extends AppCompatActivity implements DBLoader<Cursor>,
     public void hideErrorMessage()
     {
         this.movies_error_text_view.setVisibility(View.GONE);
+    }
+
+    private void getMoviesFromDB(String title)
+    {
+        if(title.equals(getString(R.string.favourite_movies)))
+        {
+            MovieController.getInstance().getFavouriteMovies(this);
+        }
+        else if(title.equals(getString(R.string.top_ranking_movies)))
+        {
+            MovieController.getInstance().getMoviesWithLoader(this,MovieTable.PATH_TOP_RATED);
+        }
+        else
+        {
+            MovieController.getInstance().getMoviesWithLoader(this,MovieTable.PATH_MOST_POPULAR);
+        }
     }
 }

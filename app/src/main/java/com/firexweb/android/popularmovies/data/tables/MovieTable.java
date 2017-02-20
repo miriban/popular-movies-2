@@ -21,6 +21,7 @@ public class MovieTable implements TableInterface
     public static final String PATH_MOVIES = "movies";
     public static final String PATH_MOST_POPULAR = "popular";
     public static final String PATH_TOP_RATED = "top_rated";
+    public static final String PATH_FAVOURITE = "favourite";
 
     public static final class Entry
     {
@@ -41,12 +42,16 @@ public class MovieTable implements TableInterface
     // use special cases for every table
     public static final int CODE_TOP_RATED_MOVIES = 100;
     public static final int CODE_MOST_POPULAR_MOVIES = 101;
+    public static final int CODE_FAVOURITE_MOVIES = 102;
+    public static final int CODE_CERTAIN_FAVOURITE_MOVIE = 103;
 
     private static UriMatcher buildUriMatcher()
     {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(MovieContract.AUTHORITY,PATH_MOVIES+"/"+PATH_TOP_RATED,CODE_TOP_RATED_MOVIES);
         uriMatcher.addURI(MovieContract.AUTHORITY,PATH_MOVIES+"/"+PATH_MOST_POPULAR,CODE_MOST_POPULAR_MOVIES);
+        uriMatcher.addURI(MovieContract.AUTHORITY,PATH_MOVIES+"/"+PATH_FAVOURITE,CODE_FAVOURITE_MOVIES);
+        uriMatcher.addURI(MovieContract.AUTHORITY,PATH_MOVIES+"/"+PATH_FAVOURITE+"/#",CODE_CERTAIN_FAVOURITE_MOVIE);
         return uriMatcher;
     }
 
@@ -58,7 +63,7 @@ public class MovieTable implements TableInterface
                 Entry.COLUMN_TITLE+" TEXT NOT NULL, "+
                 Entry.COLUMN_POSTER_URL+" TEXT NOT NULL, "+
                 Entry.COLUMN_OVERVIEW+" TEXT NOT NULL, "+
-                Entry.COLUMN_RELEASE_DATE+" INTEGER NOT NULL, "+
+                Entry.COLUMN_RELEASE_DATE+" TEXT NOT NULL, "+
                 Entry.COLUMN_RATING+" FLOAT NOT NULL, "+
                 Entry.COLUMN_IS_POPULAR+" INTEGER NOT NULL DEFAULT 0, "+
                 Entry.COLUMN_IS_TOP_RATED+" INTEGER NOT NULL DEFAULT 0, "+
@@ -89,6 +94,12 @@ public class MovieTable implements TableInterface
                 selection = Entry.COLUMN_IS_TOP_RATED + "=?";
                 selectionArgs = new String[]{"1"};
                 returnedCursor = db.query(Entry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                break;
+
+            case CODE_FAVOURITE_MOVIES:
+                selection = Entry.COLUMN_IS_FAVOURITE + "=?";
+                selectionArgs = new String[]{"1"};
+                returnedCursor = db.query(Entry.TABLE_NAME,projection,selection,selectionArgs,null,null,sortOrder);
                 break;
         }
         return returnedCursor;
@@ -136,6 +147,7 @@ public class MovieTable implements TableInterface
                     throw new SQLException("Failed to insert row into "+uri);
                 }
                 break;
+
         }
         return returnedUri;
     }
@@ -183,6 +195,12 @@ public class MovieTable implements TableInterface
                 if(!CheckingUtility.isValueLong(values,Entry.COLUMN_RELEASE_DATE))
                     throw new UnsupportedOperationException(("Column: "+Entry.COLUMN_RELEASE_DATE
                             +" must be converted into long!"));
+                numberOfRows = db.update(Entry.TABLE_NAME,values,selection,selectionArgs);
+                break;
+
+            case CODE_CERTAIN_FAVOURITE_MOVIE:
+                selection = Entry.COLUMN_MOVIE_ID + "=?";
+                selectionArgs = new String[]{uri.getPathSegments().get(2)};
                 numberOfRows = db.update(Entry.TABLE_NAME,values,selection,selectionArgs);
                 break;
 

@@ -1,25 +1,25 @@
 package com.firexweb.android.popularmovies;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.widget.Toast;
 
 import com.firexweb.android.popularmovies.data.content.MovieContract;
 import com.firexweb.android.popularmovies.data.tables.MovieTable;
+import com.firexweb.android.popularmovies.data.tables.ReviewTable;
 import com.firexweb.android.popularmovies.data.tables.TrailerTable;
 import com.firexweb.android.popularmovies.gui.activities.DetailActivity;
 import com.firexweb.android.popularmovies.gui.activities.MainActivity;
-import com.firexweb.android.popularmovies.items.Trailer;
+import com.firexweb.android.popularmovies.items.Movie;
 import com.firexweb.android.popularmovies.loaders.LoaderBuilder;
 import com.firexweb.android.popularmovies.receivers.NetworkReceiver;
 import com.firexweb.android.popularmovies.services.MovieNetworkService;
+import com.firexweb.android.popularmovies.services.ReviewNetworkService;
 import com.firexweb.android.popularmovies.services.ServiceBuilder;
 import com.firexweb.android.popularmovies.services.TrailerNetworkService;
 import com.firexweb.android.popularmovies.utilities.NetworkUtility;
@@ -66,7 +66,6 @@ public class MovieController
     public void getTopRankedMovies(MainActivity mainActivity)
     {
         mainActivity.hideRecyclerView();
-
         ServiceBuilder builder = new ServiceBuilder(mainActivity);
         builder.setIntent(MovieNetworkService.class)
                 .setIntentExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,new NetworkReceiver(new Handler()))
@@ -75,12 +74,28 @@ public class MovieController
                 .startService();
     }
 
+    public void getFavouriteMovies(MainActivity mainActivity)
+    {
+        mainActivity.hideRecyclerView();
+        getMoviesWithLoader(mainActivity,MovieTable.PATH_FAVOURITE);
+    }
+
     public void getTrailers(DetailActivity detailActivity,int movieID)
     {
         ServiceBuilder builder = new ServiceBuilder(detailActivity);
         builder.setIntent(TrailerNetworkService.class)
                 .setIntentExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,new NetworkReceiver(new Handler()))
                 .setIntentAction(NetworkUtility.getTrailerURL(movieID))
+                .setReceiverActivity(detailActivity)
+                .startService();
+    }
+
+    public void getReviews(DetailActivity detailActivity,int movieID)
+    {
+        ServiceBuilder builder = new ServiceBuilder(detailActivity);
+        builder.setIntent(ReviewNetworkService.class)
+                .setIntentExtra(NetworkReceiver.KEY_NETWORK_RECEIVER,new NetworkReceiver(new Handler()))
+                .setIntentAction(NetworkUtility.getReviewURL(movieID))
                 .setReceiverActivity(detailActivity)
                 .startService();
     }
@@ -112,6 +127,20 @@ public class MovieController
                 .run();
     }
 
+    public void getReviewsWithLoader(DetailActivity detailActivity,int movieID)
+    {
+        Bundle bundle = new Bundle();
+        Uri uri = MovieContract.BASE_CONTENT_URI.buildUpon().appendPath(ReviewTable.PATH_REVIEWS)
+                .appendPath(Integer.toString(movieID)).build();
+        bundle.putString(DetailActivity.BUNDLE_DB_URI_KEY,uri.toString());
+        LoaderBuilder builder = new LoaderBuilder(detailActivity.getSupportLoaderManager());
+        builder.buildUpon()
+                .setLoaderId(DetailActivity.LOADER_REVIEW)
+                .setBundle(bundle)
+                .setLoaderCallBacks(detailActivity)
+                .run();
+    }
+
     public Cursor getMoviesFromDB(Context context,Uri uri)
     {
         ContentResolver contentResolver = context.getContentResolver();
@@ -125,4 +154,37 @@ public class MovieController
         return contentResolver.query(uri,ProjectionUtility.TRAILER_PROJECTION,null,null,
                 TrailerTable.Entry._ID);
     }
+
+    public Cursor getReviewsFromDB(Context context,Uri uri)
+    {
+        ContentResolver contentResolver = context.getContentResolver();
+        return contentResolver.query(uri,ProjectionUtility.REVIEW_PROJECTION,null,null,
+                ReviewTable.Entry._ID);
+    }
+
+    public void addToFavourite(Context context,Movie movie)
+    {
+        updateFavouriteValue(context,movie,1);
+        Toast.makeText(context,movie.getTitle() + " added to your favourites!",Toast.LENGTH_SHORT).show();
+        movie.setIsFavourite(true);
+    }
+
+    public void removeFromFavourite(Context context,Movie movie)
+    {
+        updateFavouriteValue(context,movie,0);
+        Toast.makeText(context,movie.getTitle() + " removed from your favourites!",Toast.LENGTH_SHORT).show();
+        movie.setIsFavourite(false);
+    }
+
+    private void updateFavouriteValue(Context context,Movie movie,int value)
+    {
+        ContentResolver contentResolver = context.getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(MovieTable.Entry.COLUMN_IS_FAVOURITE,value);
+        Uri uri = MovieContract.BASE_CONTENT_URI.buildUpon().appendPath(MovieTable.PATH_MOVIES)
+                .appendPath(MovieTable.PATH_FAVOURITE).appendPath(Integer.toString(movie.getId())).build();
+        int rowsUpdated = contentResolver.update(uri,values,null,null);
+    }
+
+
 }

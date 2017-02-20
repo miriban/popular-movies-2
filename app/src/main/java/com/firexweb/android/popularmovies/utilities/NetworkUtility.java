@@ -1,8 +1,6 @@
 package com.firexweb.android.popularmovies.utilities;
 
 import android.net.Uri;
-import android.net.wifi.ScanResult;
-import android.os.HandlerThread;
 
 import com.firexweb.android.popularmovies.BuildConfig;
 
@@ -25,6 +23,7 @@ public final class NetworkUtility
     private static final String IMAGE_MOVIE_BASE_URL = "http://image.tmdb.org/t/p/w185/";
 
     public static final String PATH_TRAILERS = "trailers";
+    public static final String PATH_REVIEWS = "reviews";
 
     private static final String API_KEY_QUERY = "api_key";
     private static final String API_KEY =  BuildConfig.MovieDBKey;
@@ -88,6 +87,13 @@ public final class NetworkUtility
     {
         Uri uri = Uri.parse(MOVIES_BASE_URL).buildUpon().appendPath(Integer.toString(movieID))
                 .appendPath(PATH_TRAILERS).appendQueryParameter(API_KEY_QUERY,API_KEY).build();
+        return uri.toString();
+    }
+
+    public static String getReviewURL(int movieID)
+    {
+        Uri uri = Uri.parse(MOVIES_BASE_URL).buildUpon().appendPath(Integer.toString(movieID))
+                .appendPath(PATH_REVIEWS).appendQueryParameter(API_KEY_QUERY,API_KEY).build();
         return uri.toString();
     }
 
